@@ -1,4 +1,5 @@
 *.pdf
+.vscode/    
 
 # Logs
 logs

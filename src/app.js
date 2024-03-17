@@ -7,3 +7,5 @@ app.use(labRouter)
 
 
 app.listen(3000)
+
+module.exports = app

@@ -8,4 +8,4 @@ app.use(labRouter)
 
 app.listen(3000)
 
-export default app;
+module.exports = app

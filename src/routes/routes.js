@@ -5,7 +5,7 @@ const labRouter = require('express').Router()
 const confereHorario = require('../middlewares/horarioPermitido.js')
 
 //Anexando o middleware para todas as rotas
-labRouter.use(confereHorario)
+//labRouter.use(confereHorario)
 
 //Dados mockados, para simular um banco de dados
 var laboratorios = [
@@ -70,31 +70,42 @@ labRouter.delete('/laboratorio', (req, res) => {
 
 //Esta rota gera um arquivo PDF para download, com uma lista contendo todos os laboratórios cadastrados
 labRouter.get('/laboratorio/relatorio', async (req, res) => {
-
-  const pdfkit = require('pdfkit')
-  const fs = require('fs')
+  const pdfkit = require('pdfkit');
 
   try {
-    const pdf = new pdfkit()
-    laboratorios.forEach((laboratorios) => {
-      pdf.text(`Nome do laboratorio: ${laboratorios.nome}`);
-      pdf.text(`Capacidade: ${laboratorios.capacidade}`);
-      pdf.text(`Descrição: ${laboratorios.descricao}`);
+      const pdfBuffer = await new Promise((resolve, reject) => {
+          const pdf = new pdfkit();
+          const chunks = [];
 
-      pdf.moveDown();
-    });
+          pdf.text('Relatório de Laboratórios\n\n');
 
-    pdf.end();
-    pdf.pipe(fs.createWriteStream('relatorio.pdf')).on('finish', () => {
-        res.download('./relatorio.pdf')
-    })
+          laboratorios.forEach((laboratorio) => {
+              pdf.text(`Nome do laboratório: ${laboratorio.nome}`);
+              pdf.text(`Capacidade: ${laboratorio.capacidade}`);
+              pdf.text(`Descrição: ${laboratorio.descricao}`);
+              pdf.moveDown();
+          });
 
+          pdf.on('data', (chunk) => {
+              chunks.push(chunk);
+          });
+
+          pdf.on('end', () => {
+              resolve(Buffer.concat(chunks));
+          });
+
+          pdf.end();
+      });
+
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', 'attachment; filename="relatorio.pdf"');
+      res.send(pdfBuffer);
   } catch (error) {
-    console.error(error);
-    res.status(500).send('Erro ao gerar o relatório.');
-    
+      console.error(error);
+      res.status(500).send('Erro ao gerar o relatório.');
   }
-})
+});
+
 
 
 module.exports = labRouter

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Testar Rotas</title>
+</head>
+
+<body>
+    <h1>Testar Rotas</h1>
+    
+    <h2>Cadastrar Laboratório</h2>
+    <form id="formLaboratorio">
+        <label for="nome">Nome:</label>
+        <input type="text" id="nome" name="nome"><br><br>
+        <label for="capacidade">Capacidade:</label>
+        <input type="text" id="capacidade" name="capacidade"><br><br>
+        <label for="descricao">Descrição:</label><br>
+        <textarea id="descricao" name="descricao"></textarea><br><br>
+        <button type="submit">Cadastrar</button>
+    </form>
+
+    <h2>Listar Laboratórios</h2>
+    <button onclick="listarLaboratorios()">Listar</button>
+    <div id="listaLaboratorios"></div>
+
+    <h2>Gerar Relatório</h2>
+    <button onclick="gerarRelatorio()">Gerar Relatório</button>
+
+    <script>
+
+        // Função para enviar dados do formulário via POST
+        document.getElementById('formLaboratorio').addEventListener('submit', function(event) {
+            event.preventDefault(); // Evita que o formulário seja enviado normalmente
+            
+            // Cria um objeto FormData para enviar os dados do formulário
+            const formData = new FormData(this);
+
+            // Faz uma solicitação POST para a rota /laboratorio/novo
+            fetch('/laboratorio/novo', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json()) // Converte a resposta para JSON
+            .then(data => {
+                // Mostra a resposta em um alerta
+                alert(JSON.stringify(data));
+            })
+            .catch(error => console.error('Erro:', error));
+        });
+
+        // Função para listar os laboratórios
+        function listarLaboratorios() {
+            fetch('/laboratorio/todos')
+                .then(response => response.json())
+                .then(data => {
+                    const listaLaboratorios = document.getElementById('listaLaboratorios');
+                    listaLaboratorios.innerHTML = '<h3>Lista de Laboratórios</h3>';
+                    data.forEach(laboratorio => {
+                        listaLaboratorios.innerHTML += `<p>Nome: ${laboratorio.nome}, Capacidade: ${laboratorio.capacidade}, Descrição: ${laboratorio.descricao}</p>`;
+                    });
+                })
+                .catch(error => console.error('Erro:', error));
+        }
+
+        // Função para gerar relatório
+        function gerarRelatorio() {
+            window.location.href = '/laboratorio/relatorio';
+        }
+    </script>
+</body>
+</html>
